@@ -66,6 +66,7 @@ The following tools are used along the project:
 1. Github Actions run on "runner" nodes, which can be provided by Git or self-provisioned.
 2. Network connectivity between the Ansible Control Node and the Docker Hosts ir required.
 3. "common" role includes a task (authorized_key) to copy ssh publick key to Docker Hosts. However, that only works when playbook (deployment.yml) is executed from CLI (fails when run from Github Actions ¿¿??). The workaround is to comment that task and manunally copy SSH public key from Ansible Control Node to each Docker Host (ssh-copy-id).
+4. Tested in a self-provisioned runner.
 
 For the Load Balancer to respond on http://ucpe.swisscom.com, the swisscom.com domain should have a type A registry to resolve "ucpe" to the ip address of the NGINX server.
 For the purpose of this assessment, it should be enough to add a new entry to your /etc/hosts:

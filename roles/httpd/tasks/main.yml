@@ -11,21 +11,6 @@
       src: index.html.j2
       dest: "{{httpd_files_dir}}index.html"
 
-#  - name: Copy REST API php to httpd docker host
-#    template:
-#      src: api.php.j2
-#      dest: "{{httpd_files_dir}}api.php"
-
-#  - name: Copy REST API install php to httpd docker host
-#    copy:
-#      src: install.php
-#      dest: "{{httpd_files_dir}}"
-
-#  - name: Pull latest httpd image
-#    docker_image:
-#      name: "{{httpd_docker_image}}"
-#      source: pull
-
   - name: Copy httpd Dockerfile to httpd docker host
     copy:
       src: Dockerfile
