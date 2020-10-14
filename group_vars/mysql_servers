@@ -1,0 +1,6 @@
+docker_volume: db_data
+db_name: database
+sql_script: sql_table.sql
+mysql_files_dir: "~/mysql_files/"
+mysql_docker_image: mysql
+mysql_docker_name: mysql_server

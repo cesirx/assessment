@@ -1,0 +1,22 @@
+
+events {
+    worker_connections  1024;
+}
+
+ 
+http {
+ 
+    upstream docker_httpd {
+ 	{% for host in groups['httpd_servers'] %}
+    	  server {{hostvars[host]['ansible_ssh_host']}}:{{hostvars[host]['http_port']}};
+	{% endfor %}
+    }
+ 
+    server {
+        listen 80;
+ 
+        location / {
+            proxy_pass         http://docker_httpd;
+        }
+    }
+}

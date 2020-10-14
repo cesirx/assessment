@@ -1,0 +1,82 @@
+---
+  ## Start Apache docker
+  
+  - name: Create remote directory for httpd files
+    file:
+      path: "{{httpd_files_dir}}"
+      state: directory
+
+  - name: Build ansible template to get a custom response (index.html) from each httpd server
+    template:
+      src: index.html.j2
+      dest: "{{httpd_files_dir}}index.html"
+
+#  - name: Copy REST API php to httpd docker host
+#    template:
+#      src: api.php.j2
+#      dest: "{{httpd_files_dir}}api.php"
+
+#  - name: Copy REST API install php to httpd docker host
+#    copy:
+#      src: install.php
+#      dest: "{{httpd_files_dir}}"
+
+#  - name: Pull latest httpd image
+#    docker_image:
+#      name: "{{httpd_docker_image}}"
+#      source: pull
+
+  - name: Copy httpd Dockerfile to httpd docker host
+    copy:
+      src: Dockerfile
+      dest: "{{httpd_files_dir}}"
+
+  # Docker image will be build from Dockerfile on every run 
+  - name: Build container image from Dockerfile
+    docker_image:
+      name: "{{httpd_docker_image}}_custom"
+      build:
+        path: "{{httpd_files_dir}}"
+        dockerfile: Dockerfile
+        pull: yes
+      source: build
+      force_source: yes
+      state: present
+
+  # Docker container will be rebuilt on every run  
+  - name: Create Docker Container
+    docker_container:
+      name: "{{httpd_docker_name}}"
+      image: "{{httpd_docker_image}}_custom"
+      state: started
+      detach: true
+      interactive: true
+      recreate: yes
+      ports:                                                                                                                                         
+      - "{{http_port}}:80"                                                                                                                           
+      volumes:                                                                                                                                       
+      - "{{httpd_files_dir}}:/usr/local/apache2/htdocs/"                                                                                             
+      healthcheck: 
+        test: ["CMD", "curl", "-f", "http://localhost"]                                                                                
+        timeout: 5s                                                                                                                                  
+        retries: 3
+
+  - name: Get info of container
+    docker_container_info:
+      name: "{{httpd_docker_name}}"
+    register: docker_info
+  
+  - debug:
+       msg: "{{docker_info.container['State']['Health']['Status']}}"
+
+  - name: Validating if the WebServer is listening in mapped port
+    wait_for:
+      host: "{{ansible_ssh_host}}" 
+      port: "{{http_port}}"
+      delay: 10
+      timeout: 30
+      state: started
+      msg: "{{ansible_ssh_host}}:{{http_port}} is not Listening"
+    register: listening
+
+

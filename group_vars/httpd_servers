@@ -1,0 +1,5 @@
+httpd_files_dir: "~/httpd_files/"
+
+httpd_docker_image: httpd
+
+httpd_docker_name: httpd_server

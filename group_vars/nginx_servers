@@ -1,0 +1,5 @@
+nginx_files_dir: "~/nginx_files/"
+
+nginx_docker_image: nginx
+
+nginx_docker_name: nginx_server

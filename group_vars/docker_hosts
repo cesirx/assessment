@@ -1,0 +1,12 @@
+centos_version: 8
+
+host_distribution: "{{ansible_facts['distribution'] }}"
+
+ansible_ssh_pass: ''
+ansible_user: 'admin'
+ansible_python_interpreter: '/usr/bin/python3'
+
+db_name: 'database'
+db_user: 'db_user'
+db_password: 'db_userpass'
+db_address: '192.168.0.1'

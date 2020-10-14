@@ -1,0 +1,47 @@
+---
+  # Start NGINX proxy_pass docker
+
+  - name: Create remote directory for nginx files
+    file:
+      path: "{{nginx_files_dir}}"
+      state: directory
+
+  - name: Build ansible template to get a custom nginx.conf file
+    template:
+      src: nginx.conf.j2
+      dest: "{{nginx_files_dir}}nginx.conf"
+
+  - name: Copy httpd Dockerfile to nginx docker host
+    copy:
+      src: Dockerfile
+      dest: "{{nginx_files_dir}}"
+
+  - name: Build container image from Dockerfile
+    docker_image:
+      name: "{{nginx_docker_image}}_custom"
+      build:
+        path: "{{nginx_files_dir}}"
+        dockerfile: Dockerfile
+        pull: yes
+      source: build
+      force_source: yes
+      state: present
+
+  - name: Create Docker Container
+    docker_container:
+      name: "{{nginx_docker_name}}"
+      image: "{{nginx_docker_image}}_custom"
+      state: started
+      detach: true
+      interactive: true
+      recreate: yes
+      ports:                                                                                                                                         
+      - "80:80"                                                                                                                           
+      volumes:        
+      - "{{nginx_files_dir}}:/etc/nginx"                                                                                                                               
+      healthcheck: 
+        test: ["CMD", "curl", "-f", "http://localhost"]                                                                                
+        timeout: 5s                                                                                                                                  
+        retries: 3
+
+

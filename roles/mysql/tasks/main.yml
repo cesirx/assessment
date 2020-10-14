@@ -1,0 +1,66 @@
+---
+  ## Start MySQL docker
+ 
+  - name: Create remote directory for mysql files
+    file:
+      path: "{{mysql_files_dir}}"
+      state: directory
+
+  # Directory is created if it does not exist
+  - name: Copy mysql script to create and populate a sample database table into mysql server
+    template:
+      src: "{{sql_script}}.j2"
+      dest: "{{mysql_files_dir}}{{sql_script}}"
+
+  # SQL scripts placed in docker-entrypoint-initdb.d/ are not executed unless datadir!=/var/lib/mysql in my.cnf
+  - name: Copy my.cnf config file
+    copy:
+      src: "my.cnf"
+      dest: "{{mysql_files_dir}}"
+  
+#  - name: Pull latest mysql image
+#    docker_image:
+#      name: "{{mysql_docker_image}}:latest"
+#      source: pull
+
+  - name: Copy mysql Dockerfile to mysql docker host
+    copy:
+      src: Dockerfile
+      dest: "{{mysql_files_dir}}"
+
+  # Docker image will be build from Dockerfile on every run 
+  - name: Build container image from Dockerfile
+    docker_image:
+      name: "{{mysql_docker_image}}_custom"
+      build:
+        path: "{{mysql_files_dir}}"
+        dockerfile: Dockerfile
+        pull: yes
+      source: build
+      force_source: yes
+      state: present
+
+  - name: Create mysql docker container
+    docker_container:
+      name: "{{mysql_docker_name}}"
+      image: "{{mysql_docker_image}}_custom"
+      state: started
+      detach: true
+      interactive: true
+      recreate: yes
+      ports:                                                                                                                                              
+      - "3306:3306"
+      volumes:
+        - "{{mysql_files_dir}}sql_table.sql:/docker-entrypoint-initdb.d/{{sql_script}}"
+        - "{{mysql_files_dir}}my.cnf:/etc/mysql/my.cnf"
+      env:
+        MYSQL_ROOT_PASSWORD: db_rootpass
+        MYSQL_DATABASE: "{{db_name}}"
+        MYSQL_USER: "{{db_user}}"
+        MYSQL_PASSWORD: "{{db_password}}"
+      healthcheck:                                                                                                                                        
+        test: ["CMD", "nc", "-vz", "localhost", "3306"]                                                                                                   
+        timeout: 5s                                                                                                                                       
+        retries: 3 
+
+

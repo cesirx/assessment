@@ -1,0 +1,81 @@
+---  
+   #- include_vars: vault.yml
+
+  - set_fact:
+     ansible_become_pass: "{{ansible_ssh_pass}}"
+
+  - name: Copy public ssh key to authorized keys file in remote host
+    authorized_key:
+      user: "{{ ansible_user }}"
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+#  - debug: var=ansible_facts
+
+  - debug:
+      msg: "{{inventory_hostname}} OS distribution: {{host_distribution}}"
+
+  - name: Create Docker Repository for Centos/RedHat
+    yum_repository:
+      name: docker
+      description: Docker Repo
+      baseurl: https://download.docker.com/linux/centos/{{centos_version}}/x86_64/stable
+      gpgcheck: no
+      enabled: yes
+    when: '"CentOS" in host_distribution'
+
+  - name: Create Docker Repository for Ubuntu
+    apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu bionic stable
+      validate_certs: no
+      state: present
+    when: '"Ubuntu" in host_distribution'
+
+#  - name: Docker Installation
+#     command: "yum install docker-ce --nobest -y"
+
+  - name: Install the latest version of docker-ce in CentOS
+    dnf:
+      name: docker-ce
+      state: latest
+    become: yes
+    when: '"CentOS" in host_distribution'
+
+  - name: Install the latest version of docker-ce in Ubuntu
+    apt: update_cache=yes allow_unauthenticated=yes name=docker-ce state=latest
+    become: yes
+    when: '"Ubuntu" in host_distribution'
+
+  - name: Install Python3 using system package manager
+    package: 
+      name: python3
+      state: present
+    become: yes
+
+  - name: Install Python library for the Docker Remote API 
+    pip:
+      name: docker
+
+  # sudo groupadd docker
+  - name: Create Docker group in managed nodes
+    group:
+      name: docker
+      state: present
+
+  # sudo usermod -aG docker {{ansible_user}}
+  - name: Add login user to Docker group (allows non root user to run docker commands)
+    user:
+      name: "{{ansible_user}}"
+      group: docker
+      append: yes
+    become: yes
+
+  # sudo systemctl enable --now docker
+  - name: Start Docker Service
+    service:
+      name: docker
+      state: started
+      enabled: yes
+    become: yes
+
+  

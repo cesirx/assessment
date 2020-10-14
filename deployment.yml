@@ -1,0 +1,38 @@
+---
+## This playbook deploys the whole application stack in this site.
+
+  # Apply common configuration to all hosts
+  - hosts: docker_hosts
+
+    roles:
+      - common
+
+    tags:
+      - setup
+
+  # Configure and deploy database servers
+  - hosts: mysql_servers
+
+    roles:
+      - mysql
+
+    tags:
+      - db
+
+  # Configure and deploy web servers
+  - hosts: httpd_servers
+  
+    roles:
+      - httpd
+
+    tags:
+      - web
+  
+  # Configure and deploy load balancer servers
+  - hosts: nginx_servers
+
+    roles:
+      - nginx
+
+    tags:
+      - balancer
