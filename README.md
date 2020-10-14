@@ -83,12 +83,12 @@ For the purpose of this assessment, it should be enough to add a new entry to yo
 ## Project execution
 
 * For CLI playbook style execution:
-1. In Ansible Control Node clone repo: "git clone https://github.com/cesirx/assessment_repo.git"
+1. In the Ansible Control Node clone repo: "git clone https://github.com/cesirx/assessment_repo.git"
 2. For a full (re)deployment execute the command as follow: "ansible-playbook deployment.yml -i hosts.yml"
 3. Specific applications can be redeployed/updated using tags: "ansible-playbook deployment.yml -i hosts.yml --tags=balancer"
 
 * For Github Actions (CI-CD Pipeline) execution:
-The configured Github action is automatically launched on "git push" 
+The configured Github Action is automatically launched on "git push" on any repository branch.
 
 ## Missing parts
 
@@ -100,10 +100,11 @@ I discovered a REST API plugin for mysql (https://labs.mysql.com/) but was not a
 
 ## Future improvements
 
+* Service continuity during updates: the playbook gets ":latest" available docker image of each application and upgrades its installed packets to the latest version (dockerfile)... but what if this makes the application to fail? Some kind of sanity checks should be run after each docker is redeployed and revert to a previous version/image in case of failure.
 * Ansible secrets management: use Vault to keep secrets safe
 * Web servers update: web application layer could be seamlessly (without enduser impact) updated. To do so web servers should be updated one by one following these steps. For each web server:
 1. Remove web server from nginx proxy pass policy so that no more connections are routed to this webserver.
 2. Wait for web server active connections to end.
 3. Update web server using "deployment.yml" playbook pointed to that specifi webserver.
-* Service continuity after updates: the playbook gets :latest available docker image of each application and upgrades its installed packets to the latest version (dockerfile)... but what if this makes the application to fail? Some kind of sanity checks should be run after each docker is deployed and revert to a previous version in case of failure
+
 
