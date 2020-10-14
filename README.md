@@ -58,15 +58,17 @@ The following tools are used along the project:
 
 * For CLI playbook style execution:
 1. A functional Ansible Control Node from which playbooks will be executed.
-2. A pool of docker hosts running Ubuntu or CentOS/RHEL to run the containers. 
-3. For high availability in the webserver layer, at least 2 docker hosts would be required.
-4. Network connectivity between the Ansible Control Node and the Docker Hosts ir required.
+2. A pair of ssh keys (public-private) must exist in the Ansible Control Node (ssh-keygen)
+3. A pool of docker hosts running Ubuntu or CentOS/RHEL to run the containers. 
+4. For high availability in the webserver layer, at least 2 docker hosts would be required.
+5. Network connectivity between the Ansible Control Node and the Docker Hosts ir required.
 
 * For Github Actions (CI-CD Pipeline) to work:
 1. Github Actions run on "runner" nodes, which can be provided by Git or self-provisioned.
-2. Network connectivity between the Ansible Control Node and the Docker Hosts ir required.
-3. "common" role includes a task (authorized_key) to copy ssh publick key to Docker Hosts. However, that only works when playbook (deployment.yml) is executed from CLI (fails when run from Github Actions ¿¿??). The workaround is to comment that task and manunally copy SSH public key from Ansible Control Node to each Docker Host (ssh-copy-id).
-4. Tested in a self-provisioned runner.
+2. A pair of ssh keys (public-private) must exist in the runner node (ssh-keygen)
+3. Network connectivity between the Ansible Control Node and the Docker Hosts ir required.
+4. "common" role includes a task (authorized_key) to copy ssh publick key to Docker Hosts. However, that only works when playbook (deployment.yml) is executed from CLI (fails when run from Github Actions ¿¿??). The workaround is to comment that task and manunally copy SSH public key from Ansible Control Node to each Docker Host (ssh-copy-id).
+5. Tested in a self-provisioned runner.
 
 For the Load Balancer to respond on http://ucpe.swisscom.com, the swisscom.com domain should have a type A registry to resolve "ucpe" to the ip address of the NGINX server.
 For the purpose of this assessment, it should be enough to add a new entry to your /etc/hosts:
