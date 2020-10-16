@@ -3,12 +3,12 @@
 
   - set_fact:
      ansible_become_pass: "{{ansible_ssh_pass}}"
-
-  - name: Copy public ssh key to authorized keys file in remote host
-    authorized_key:
-      user: "{{ ansible_user }}"
-      state: present
-      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  # Enable if required
+  #- name: Copy public ssh key to authorized keys file in remote host
+  #  authorized_key:
+  #    user: "{{ ansible_user }}"
+  #    state: present
+  #    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
 #  - debug: var=ansible_facts
 
